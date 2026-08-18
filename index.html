@@ -151,6 +151,15 @@
   .service-card p{color:var(--text-mid); font-size:14.5px; margin-bottom:20px;}
   .service-card ul{list-style:none; font-size:13.5px; color:var(--text-dim); display:flex; flex-direction:column; gap:8px;}
   .service-card li::before{content:"— "; color:var(--gold-dim);}
+  .service-card p:last-child{margin-bottom:0;}
+
+  .services-sub{margin-top:80px;}
+  @media (max-width:640px){ .services-sub{margin-top:56px;} }
+  .sub-head{padding-top:34px; border-top:1px solid var(--line); margin-bottom:38px; max-width:640px;}
+  .sub-head h3{font-family:var(--display); font-weight:600; font-size:clamp(22px,3vw,30px); letter-spacing:-0.01em; margin-top:14px;}
+  .sub-head p{color:var(--text-mid); font-size:15px; margin-top:12px;}
+  .services-prose{display:grid; grid-template-columns:repeat(2,1fr); gap:24px;}
+  @media (max-width:900px){ .services-prose{grid-template-columns:1fr;} }
 
   /* ---------- süreç ---------- */
   .process{background:var(--panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
@@ -324,7 +333,7 @@
     <div class="section-head" data-reveal>
       <div class="mono-label">HİZMETLER</div>
       <h2>İnşaattan haritaya, tek çatı altında.</h2>
-      <p>Arsanızın değerlendirilmesinden ölçüm ve mühendislik desteğine kadar üç ana başlıkta hizmet veriyoruz.</p>
+      <p>Arsanızın değerlendirilmesinden ölçüme, kaba ve ince işçilikten taahhüde kadar yapım sürecinin her başlığında hizmet veriyoruz.</p>
     </div>
     <div class="services" data-reveal>
       <div class="service-card">
@@ -345,6 +354,7 @@
           <li>Plankote ve aplikasyon</li>
           <li>İmar durumu ve parselasyon incelemesi</li>
           <li>Zemin etüdü koordinasyonu</li>
+          <li>Kübaj — hafriyat, kazı ve dolgu hesapları</li>
         </ul>
       </div>
       <div class="service-card">
@@ -356,6 +366,36 @@
           <li>Taşeron ve tedarik koordinasyonu</li>
           <li>Teslim ve iskân süreci takibi</li>
         </ul>
+      </div>
+    </div>
+
+    <div class="services-sub">
+      <div class="sub-head" data-reveal>
+        <div class="mono-label">İŞÇİLİK &amp; TAAHHÜT</div>
+        <h3>Yapım aşamasında saha hizmetleri</h3>
+        <p>Kaba inşaattan son dokunuşa kadar işçilik ve taahhüt kalemlerini kendi ekibimizle yürütüyoruz.</p>
+      </div>
+      <div class="services-prose" data-reveal>
+        <div class="service-card">
+          <div class="num">/ HİZMET 04</div>
+          <h3>Kaba İşçilik Hizmeti</h3>
+          <p>Projelerinizin yapım süreçlerinin tamamına destek vermekten gurur duyuyoruz. Bünyemizdeki uzman kadromuz ile kaba inşaat işçilik hizmetlerinizi güvenle sunuyoruz. EDE İnşaat; İstanbul başta olmak üzere birçok projenin kaba işçilik hizmetini başarıyla tamamlamış, birçok yaşam alanı için güvenli yapılar inşa etmiş ve yaşam alanlarınıza katma değer katmıştır.</p>
+        </div>
+        <div class="service-card">
+          <div class="num">/ HİZMET 05</div>
+          <h3>İnce İşçilik Hizmetleri</h3>
+          <p>Projelerinizin son dokunuşunu yapmak bizim için mutluluktur. Kaba işçiliği bitmiş birçok binanın ince işçilik hizmetini alanında uzman ekibimiz ile tamamlıyoruz. Projelerinizin en ince ayrıntısına kadar mimari özelliklerini yansıtması için çalışıyoruz. Yaşam kalitenizi artıracak yapıları kendi dokunuşlarımızla mimari ve mühendislik anlamında kusursuz hale getiriyor, binanın görsel bütünlüğünü ortaya çıkaran ince işçiliği bu doğrultuda sağlıyoruz.</p>
+        </div>
+        <div class="service-card">
+          <div class="num">/ HİZMET 06</div>
+          <h3>Taahhüt Hizmetleri</h3>
+          <p>Yaptığımız projelerde kalite güvencesi en önemli unsurlardan biridir. Geçerli standartlara uygun bir proje yapıldığından bu şekilde emin olabiliriz. Maliyetleri düşürmek adına yanlış işlemler yapmak, imalatın projeye uygunluğu konusunda sakıncalar doğurmaktadır. EDE İnşaat bu hususa önem göstermekte; projelerin ilk adımından son adımına kadar işlemlerin en doğru yöntemlerle yapılması konusunda müşterilerine güvence vermektedir.</p>
+        </div>
+        <div class="service-card">
+          <div class="num">/ HİZMET 07</div>
+          <h3>Cephe Yalıtım Hizmetleri</h3>
+          <p>EDE İnşaat olarak, işçilik hizmeti sunduğumuz birçok projede dış cephe yalıtımı alanında da hizmet sağladık. Ana hizmet kollarımızdan birini oluşturan yalıtım ve dış cephe işçiliğini Ytong gibi kaliteli ve 1. sınıf malzemeler ile tamamlıyoruz. Binalarınızın soğuğa ve sıcağa karşı dayanıklılığını artırıyor, afetlerde yanma riskine karşı korunmasını sağlıyoruz.</p>
+        </div>
       </div>
     </div>
   </div>
