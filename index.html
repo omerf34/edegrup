@@ -1,528 +1,452 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EDE İnşaat | Harita — Kat Karşılığı İnşaat & Harita Mühendisliği</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink-black:#0B0A08;
-    --panel:#14120D;
-    --panel-2:#1C1912;
-    --gold:#C9A15C;
-    --gold-bright:#E7C77E;
-    --gold-dim:#8A713F;
-    --paper:#F4F0E6;
-    --text-hi:#F3EFE4;
-    --text-mid:#B9B2A0;
-    --text-dim:#7C7666;
-    --line:rgba(201,161,92,0.18);
-    --radius:2px;
-    --display:'Space Grotesk', sans-serif;
-    --body:'Inter', sans-serif;
-    --mono:'JetBrains Mono', monospace;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--ink-black);
-    color:var(--text-hi);
-    font-family:var(--body);
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-  }
-  a{color:inherit; text-decoration:none;}
-  img{max-width:100%; display:block;}
-  ::selection{background:var(--gold); color:var(--ink-black);}
-  a:focus-visible, button:focus-visible{outline:2px solid var(--gold-bright); outline-offset:3px;}
-
-  .wrap{max-width:1180px; margin:0 auto; padding:0 32px;}
-  @media (max-width:640px){ .wrap{padding:0 20px;} }
-
-  /* ---------- topo texture ---------- */
-  .topo{
-    position:absolute; inset:0; opacity:0.35; pointer-events:none;
-    background-image:
-      repeating-radial-gradient(circle at 15% 20%, transparent 0, transparent 38px, var(--line) 39px, transparent 40px),
-      repeating-radial-gradient(circle at 85% 75%, transparent 0, transparent 52px, var(--line) 53px, transparent 54px);
-  }
-
-  .mono-label{
-    font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--gold); display:flex; align-items:center; gap:10px;
-  }
-  .mono-label::before{content:""; width:22px; height:1px; background:var(--gold-dim);}
-
-  /* ---------- header ---------- */
-  header{
-    position:fixed; top:0; left:0; right:0; z-index:50;
-    background:rgba(11,10,8,0.82); backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--line);
-  }
-  .nav{display:flex; align-items:center; justify-content:space-between; height:76px;}
-  .logo{display:flex; align-items:center; gap:10px; font-family:var(--display); font-weight:700; font-size:22px; letter-spacing:.02em;}
-  .logo .mark{width:28px; height:28px; flex-shrink:0;}
-  .logo span{color:var(--gold);}
-  .navlinks{display:flex; gap:34px; font-size:14px; color:var(--text-mid);}
-  .navlinks a{transition:color .2s;}
-  .navlinks a:hover{color:var(--gold-bright);}
-  .nav-cta{
-    font-family:var(--mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase;
-    border:1px solid var(--gold-dim); padding:10px 18px; color:var(--gold-bright);
-    transition:background .2s, color .2s;
-  }
-  .nav-cta:hover{background:var(--gold); color:var(--ink-black);}
-  .navlinks, .nav-cta{display:flex;}
-  @media (max-width:800px){ .navlinks{display:none;} }
-
-  /* ---------- hero ---------- */
-  .hero{
-    position:relative; overflow:hidden;
-    min-height:92vh; display:flex; align-items:center;
-    padding-top:76px;
-    border-bottom:1px solid var(--line);
-  }
-  .hero-grid{
-    position:relative; z-index:2; display:grid; grid-template-columns:1.3fr 1fr; gap:60px; align-items:end;
-    padding:100px 0 80px;
-  }
-  @media (max-width:900px){ .hero-grid{grid-template-columns:1fr; padding:70px 0 60px;} }
-
-  .hero h1{
-    font-family:var(--display); font-weight:700;
-    font-size:clamp(40px, 6vw, 74px); line-height:1.03; letter-spacing:-0.01em;
-    margin:22px 0 26px;
-  }
-  .hero h1 em{font-style:normal; color:var(--gold-bright);}
-  .hero p.lead{font-size:17px; color:var(--text-mid); max-width:480px; margin-bottom:38px;}
-  .btn-row{display:flex; gap:16px; flex-wrap:wrap;}
-  .btn{
-    font-family:var(--mono); font-size:13px; letter-spacing:.05em; text-transform:uppercase;
-    padding:15px 26px; display:inline-flex; align-items:center; gap:10px; transition:all .2s;
-  }
-  .btn-primary{background:var(--gold); color:var(--ink-black);}
-  .btn-primary:hover{background:var(--gold-bright);}
-  .btn-ghost{border:1px solid var(--line); color:var(--text-hi);}
-  .btn-ghost:hover{border-color:var(--gold);}
-
-  .hero-plate{
-    border:1px solid var(--line); padding:26px; background:var(--panel);
-  }
-  .hero-plate .coord{font-family:var(--mono); font-size:12px; color:var(--gold); letter-spacing:.05em; margin-bottom:14px;}
-  .hero-plate .coord span{color:var(--text-dim);}
-  .hero-plate svg{width:100%; height:auto;}
-
-  /* ---------- marquee-ish strip ---------- */
-  .strip{
-    border-bottom:1px solid var(--line); padding:20px 0; overflow:hidden;
-  }
-  .strip-inner{display:flex; gap:60px; font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); white-space:nowrap;}
-  .strip-inner span{color:var(--gold-dim);}
-
-  /* ---------- section basics ---------- */
-  section{padding:110px 0; position:relative;}
-  @media (max-width:640px){ section{padding:70px 0;} }
-  .section-head{max-width:640px; margin-bottom:64px;}
-  .section-head h2{
-    font-family:var(--display); font-weight:600; font-size:clamp(28px,4vw,42px); letter-spacing:-0.01em; margin-top:16px;
-  }
-  .section-head p{color:var(--text-mid); margin-top:16px; font-size:15.5px;}
-
-  /* ---------- neden biz ---------- */
-  .why-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
-  @media (max-width:800px){ .why-grid{grid-template-columns:1fr;} }
-  .why-card{background:var(--ink-black); padding:38px 32px;}
-  .why-card .mono-label{margin-bottom:20px;}
-  .why-card h3{font-family:var(--display); font-size:20px; font-weight:600; margin-bottom:12px;}
-  .why-card p{color:var(--text-mid); font-size:14.5px;}
-
-  /* ---------- hizmetler ---------- */
-  .services{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
-  @media (max-width:900px){ .services{grid-template-columns:1fr;} }
-  .service-card{
-    background:var(--panel); border:1px solid var(--line); padding:36px 30px;
-    transition:border-color .25s, transform .25s;
-  }
-  .service-card:hover{border-color:var(--gold-dim); transform:translateY(-4px);}
-  .service-card .num{font-family:var(--mono); color:var(--gold-dim); font-size:13px;}
-  .service-card h3{font-family:var(--display); font-size:21px; font-weight:600; margin:18px 0 12px;}
-  .service-card p{color:var(--text-mid); font-size:14.5px; margin-bottom:20px;}
-  .service-card ul{list-style:none; font-size:13.5px; color:var(--text-dim); display:flex; flex-direction:column; gap:8px;}
-  .service-card li::before{content:"— "; color:var(--gold-dim);}
-  .service-card p:last-child{margin-bottom:0;}
-
-  .services-sub{margin-top:80px;}
-  @media (max-width:640px){ .services-sub{margin-top:56px;} }
-  .sub-head{padding-top:34px; border-top:1px solid var(--line); margin-bottom:38px; max-width:640px;}
-  .sub-head h3{font-family:var(--display); font-weight:600; font-size:clamp(22px,3vw,30px); letter-spacing:-0.01em; margin-top:14px;}
-  .sub-head p{color:var(--text-mid); font-size:15px; margin-top:12px;}
-  .services-prose{display:grid; grid-template-columns:repeat(2,1fr); gap:24px;}
-  @media (max-width:900px){ .services-prose{grid-template-columns:1fr;} }
-
-  /* ---------- süreç ---------- */
-  .process{background:var(--panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
-  .process-list{display:flex; flex-direction:column;}
-  .process-item{
-    display:grid; grid-template-columns:90px 1fr; gap:28px; padding:32px 0; border-top:1px solid var(--line);
-  }
-  .process-item:last-child{border-bottom:1px solid var(--line);}
-  .process-item .num{font-family:var(--mono); font-size:26px; color:var(--gold-dim);}
-  .process-item h4{font-family:var(--display); font-size:19px; font-weight:600; margin-bottom:8px;}
-  .process-item p{color:var(--text-mid); font-size:14.5px; max-width:560px;}
-  @media (max-width:600px){ .process-item{grid-template-columns:1fr; gap:8px;} }
-
-  /* ---------- projeler placeholder ---------- */
-  .projects-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
-  @media (max-width:900px){ .projects-grid{grid-template-columns:1fr 1fr;} }
-  @media (max-width:600px){ .projects-grid{grid-template-columns:1fr;} }
-  .project-card{
-    aspect-ratio:4/3; background:var(--panel); border:1px solid var(--line);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
-    color:var(--text-dim); position:relative; overflow:hidden;
-  }
-  .project-card svg{width:46px; height:46px; opacity:.5;}
-  .project-card span{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase;}
-
-  /* ---------- ekip ---------- */
-  .team-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
-  @media (max-width:800px){ .team-grid{grid-template-columns:1fr;} }
-  .team-card{border:1px solid var(--line); background:var(--ink-black); padding:30px;}
-  .team-card .avatar{
-    width:52px; height:52px; border:1px solid var(--gold-dim); display:flex; align-items:center; justify-content:center;
-    font-family:var(--display); font-weight:700; color:var(--gold); margin-bottom:22px;
-  }
-  .team-card h4{font-family:var(--display); font-size:18px; font-weight:600;}
-  .team-card .role{font-family:var(--mono); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-dim); margin:6px 0 20px;}
-  .team-card .contact-line{font-size:13.5px; color:var(--text-mid); margin-bottom:6px;}
-
-  /* ---------- contact ---------- */
-  .contact{background:var(--paper); color:var(--ink-black);}
-  .contact .mono-label{color:var(--gold-dim);}
-  .contact .mono-label::before{background:var(--gold-dim);}
-  .contact-grid{display:grid; grid-template-columns:1fr 1fr; gap:60px;}
-  @media (max-width:800px){ .contact-grid{grid-template-columns:1fr; gap:40px;} }
-  .contact h2{font-family:var(--display); font-size:clamp(28px,4vw,40px); font-weight:600; margin:16px 0 24px;}
-  .contact p.lead{color:#4A4536; font-size:15.5px; margin-bottom:32px; max-width:440px;}
-  .info-row{display:flex; gap:16px; padding:16px 0; border-top:1px solid rgba(11,10,8,0.12);}
-  .info-row:last-child{border-bottom:1px solid rgba(11,10,8,0.12);}
-  .info-row .k{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#8A8368; width:110px; flex-shrink:0; padding-top:2px;}
-  .info-row .v{font-size:15px; color:#1E1B12;}
-
-  form{display:flex; flex-direction:column; gap:16px;}
-  .field label{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#8A8368; display:block; margin-bottom:8px;}
-  .field input, .field textarea{
-    width:100%; background:transparent; border:none; border-bottom:1px solid rgba(11,10,8,0.3);
-    padding:10px 2px; font-family:var(--body); font-size:15px; color:#1E1B12;
-  }
-  .field input:focus, .field textarea:focus{outline:none; border-color:var(--gold-dim);}
-  .field textarea{resize:vertical; min-height:80px;}
-  .submit-btn{
-    align-self:flex-start; margin-top:8px; background:var(--ink-black); color:var(--paper);
-    font-family:var(--mono); font-size:13px; letter-spacing:.05em; text-transform:uppercase;
-    padding:15px 30px; border:none; cursor:pointer; transition:background .2s;
-  }
-  .submit-btn:hover{background:#2A2519;}
-
-  /* ---------- footer ---------- */
-  footer{border-top:1px solid var(--line); padding:44px 0;}
-  .foot-row{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;}
-  .foot-row .logo{font-size:17px;}
-  .foot-row .copy{font-size:12.5px; color:var(--text-dim); font-family:var(--mono);}
-
-  [data-reveal]{opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease;}
-  [data-reveal].in{opacity:1; transform:translateY(0);}
-  @media (prefers-reduced-motion: reduce){ [data-reveal]{opacity:1; transform:none; transition:none;} html{scroll-behavior:auto;} }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EDE İnşaat | Harita & Kat Karşılığı İnşaat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{background:#090909;color:#fff;font-family:"DM Sans",sans-serif;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    img{display:block;width:100%}
+    :root{--black:#090909;--dark:#111;--cream:#f2efe9;--gold:#b9a47c;--gold-light:#d6c49e;--gray:#999;--line:rgba(255,255,255,.13)}
+    .loader{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#090909;transition:opacity .8s ease,visibility .8s ease}
+    .loader.hide{opacity:0;visibility:hidden}
+    .loader-inner{text-align:center}
+    .loader-logo{font-family:Manrope,sans-serif;font-size:30px;letter-spacing:7px;font-weight:700}
+    .loader-sub{margin-top:8px;color:var(--gold);font-size:8px;letter-spacing:6px}
+    .loader-line{width:0;height:1px;margin:25px auto 0;background:var(--gold);animation:loading 1.5s ease forwards}
+    @keyframes loading{to{width:100px}}
+    .navbar{position:absolute;z-index:100;top:0;left:0;width:100%;height:92px;padding:0 6vw;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);transition:background .4s ease,height .4s ease}
+    .navbar.scrolled{position:fixed;height:75px;background:rgba(8,8,8,.94);backdrop-filter:blur(15px)}
+    .logo{display:flex;align-items:center;gap:12px;font-family:Manrope,sans-serif;font-size:16px;font-weight:800;letter-spacing:2px}
+    .logo-mark{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--gold);color:var(--gold-light);font-family:Georgia,serif;font-size:21px;font-weight:400}
+    .logo small{display:block;margin-top:2px;color:var(--gold-light);font-size:7px;font-weight:500;letter-spacing:5px}
+    .nav-links{display:flex;align-items:center;gap:40px;font-size:12px}
+    .nav-links>a,.dropdown>a{position:relative;padding:35px 0;transition:color .3s ease}
+    .nav-links>a::after,.dropdown>a::after{content:"";position:absolute;left:0;bottom:27px;width:0;height:1px;background:var(--gold);transition:width .3s ease}
+    .nav-links>a:hover,.dropdown>a:hover{color:var(--gold-light)}
+    .nav-links>a:hover::after,.dropdown>a:hover::after{width:100%}
+    .dropdown{position:relative}
+    .dropdown>a span{margin-left:5px;color:var(--gold)}
+    .dropdown-menu{position:absolute;top:73px;left:-25px;width:230px;padding:12px;background:#171717;border:1px solid var(--line);opacity:0;visibility:hidden;transform:translateY(12px);transition:.3s ease}
+    .dropdown:hover .dropdown-menu{opacity:1;visibility:visible;transform:translateY(0)}
+    .dropdown-menu a{display:block;padding:13px;color:#aaa;font-size:11px;transition:.25s ease}
+    .dropdown-menu a:hover{color:#fff;background:#222}
+    .mobile-button{display:none;width:44px;height:44px;border:1px solid var(--line);background:transparent;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}
+    .mobile-button span{width:18px;height:1px;background:#fff;transition:.3s ease}
+    .mobile-menu{position:fixed;z-index:90;inset:0;display:flex;align-items:center;justify-content:center;background:#0b0b0b;opacity:0;visibility:hidden;transition:.4s ease}
+    .mobile-menu.active{opacity:1;visibility:visible}
+    .mobile-menu-inner{width:80%}
+    .mobile-menu a{display:block;padding:18px 0;border-bottom:1px solid var(--line);font-family:Manrope,sans-serif;font-size:25px;font-weight:500;color:#fff}
+    .hero{min-height:100vh;position:relative;display:flex;align-items:center;overflow:hidden}
+    .hero-bg{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.92),rgba(0,0,0,.62),rgba(0,0,0,.28)),url("https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=2200&q=90") center/cover;transform:scale(1.04);animation:heroZoom 8s ease forwards}
+    @keyframes heroZoom{to{transform:scale(1)}}
+    .hero-content{position:relative;z-index:2;width:88%;max-width:1200px;margin:auto;padding-top:80px}
+    .eyebrow{margin-bottom:28px;color:var(--gold-light);font-size:9px;font-weight:600;letter-spacing:4px}
+    .hero h1{max-width:900px;font-family:Manrope,sans-serif;font-size:clamp(50px,7vw,105px);line-height:.96;letter-spacing:-5px;font-weight:500}
+    .hero h1 span{color:var(--gold-light)}
+    .hero-text{max-width:560px;margin-top:35px;color:#aaa;font-size:14px;line-height:1.9}
+    .hero-buttons{display:flex;gap:13px;margin-top:40px}
+    .button{min-height:54px;padding:0 26px;display:inline-flex;align-items:center;justify-content:center;gap:18px;font-size:11px;font-weight:600;transition:.3s ease}
+    .button-gold{color:#111;background:var(--gold)}
+    .button-gold:hover{background:var(--gold-light);transform:translateY(-3px)}
+    .button-outline{border:1px solid rgba(255,255,255,.35)}
+    .button-outline:hover{color:#111;background:#fff}
+    .arrow{font-size:17px}
+    .scroll{position:absolute;z-index:3;bottom:35px;left:6vw;display:flex;align-items:center;gap:18px;color:#999;font-size:7px;letter-spacing:3px}
+    .scroll-line{width:70px;height:1px;background:var(--gold)}
+    .mission{padding:140px 8vw;background:var(--cream);color:#0b0b0b}
+    .section-number{margin-bottom:65px;color:#999;font-size:10px;letter-spacing:2px}
+    .mission-content{max-width:1050px;margin-left:17%}
+    .dark{color:#927d5b}
+    .mission h2,.section-title{font-family:Manrope,sans-serif;font-size:clamp(50px,6vw,88px);line-height:.98;letter-spacing:-5px;font-weight:500}
+    .mission h2 em,.section-title em{color:#9c8761;font-style:normal}
+    .mission-description{max-width:650px;margin-top:40px;color:#555;font-size:15px;line-height:1.9}
+    .president{display:grid;grid-template-columns:44% 56%;background:#111}
+    .president-image{min-height:900px;position:relative}
+    .president-image img{width:100%;height:100%;object-fit:cover;filter:grayscale(100%)}
+    .president-image::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 45%,rgba(0,0,0,.8))}
+    .image-label{position:absolute;z-index:2;bottom:45px;left:45px;color:var(--gold-light);font-size:8px;letter-spacing:4px}
+    .president-content{padding:100px 8vw}
+    .president-content .eyebrow{margin-top:70px}
+    .president h2{max-width:700px;font-family:Manrope,sans-serif;font-size:clamp(45px,5vw,75px);line-height:1;letter-spacing:-4px;font-weight:500}
+    .president h2 em{color:var(--gold-light);font-style:normal}
+    .quote{max-width:650px;position:relative;margin-top:55px;padding-left:48px}
+    .quote-mark{position:absolute;top:-25px;left:0;color:var(--gold);font-family:Georgia,serif;font-size:70px}
+    .quote p{margin-bottom:22px;color:#999;font-size:13px;line-height:1.95}
+    .signature{display:flex;flex-direction:column;margin-top:45px;padding-top:25px;border-top:1px solid var(--line)}
+    .signature strong{font-family:Manrope,sans-serif;font-size:18px;font-weight:500}
+    .signature span{margin-top:7px;color:var(--gold-light);font-size:9px;letter-spacing:1px}
+    .subsidiaries{padding:135px 7vw;background:#f5f3ef;color:#0b0b0b}
+    .section-heading{display:grid;grid-template-columns:1fr .65fr;gap:80px;align-items:end;margin-bottom:75px}
+    .section-heading p:last-child{max-width:440px;color:#666;font-size:13px;line-height:1.9}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:23px}
+    .card{background:#fff;overflow:hidden;transition:transform .45s ease,box-shadow .45s ease}
+    .card:hover{transform:translateY(-10px);box-shadow:0 30px 60px rgba(0,0,0,.12)}
+    .card-image{height:330px;position:relative;overflow:hidden}
+    .card-image img{width:100%;height:100%;object-fit:cover;filter:grayscale(25%);transition:transform .6s ease}
+    .card:hover .card-image img{transform:scale(1.07)}
+    .card-number{position:absolute;top:20px;right:20px;width:42px;height:42px;display:grid;place-items:center;background:rgba(0,0,0,.65);color:#fff;font-size:10px}
+    .card-content{padding:35px}
+    .card-tag{color:#9b8865;font-size:8px;font-weight:600;letter-spacing:3px}
+    .card h3{margin-top:14px;font-family:Manrope,sans-serif;font-size:27px;font-weight:500}
+    .card p{min-height:115px;margin-top:18px;color:#666;font-size:12px;line-height:1.8}
+    .card-link{display:inline-flex;align-items:center;gap:14px;margin-top:23px;padding-bottom:7px;border-bottom:1px solid #ccc;font-size:10px;font-weight:600;letter-spacing:1px;transition:.3s ease}
+    .card-link:hover{color:#9b8865}
+    .cta{min-height:620px;position:relative;display:flex;align-items:center;justify-content:center;text-align:center}
+    .cta-bg{position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.76),rgba(0,0,0,.9)),url("https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=2200&q=85") center/cover}
+    .cta-content{position:relative;z-index:2}
+    .cta h2{font-family:Manrope,sans-serif;font-size:clamp(55px,7vw,100px);line-height:.95;letter-spacing:-5px;font-weight:500}
+    .cta h2 em{color:var(--gold-light);font-style:normal}
+    .cta-description{max-width:560px;margin:30px auto;color:#aaa;font-size:13px;line-height:1.8}
+    .button-white{color:#111;background:#fff}
+    .button-white:hover{background:var(--gold-light);transform:translateY(-3px)}
+    footer{padding:90px 7vw 25px;background:#090909}
+    .footer-top{display:grid;grid-template-columns:1.5fr .7fr 1fr;gap:80px;padding-bottom:80px}
+    .footer-brand p{max-width:300px;margin-top:25px;color:#666;font-size:12px;line-height:1.8}
+    .footer-column{display:flex;flex-direction:column;gap:12px;color:#777;font-size:11px;line-height:1.8}
+    .footer-column h4{margin-bottom:10px;color:var(--gold-light);font-size:8px;letter-spacing:3px}
+    .footer-column a{transition:color .25s ease}
+    .footer-column a:hover{color:#fff}
+    .footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:25px;border-top:1px solid var(--line);color:#4d4d4d;font-size:8px;letter-spacing:.5px}
+    .reveal{opacity:0;transform:translateY(35px);transition:opacity .8s ease,transform .8s ease}
+    .reveal.show{opacity:1;transform:translateY(0)}
+    @media(max-width:1000px){
+      .nav-links{gap:20px}.president{grid-template-columns:1fr}.president-image{min-height:600px;max-height:700px}.cards{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:760px){
+      .navbar{height:75px;padding:0 6vw}.nav-links{display:none}.mobile-button{display:flex}.hero-content{padding-top:70px}
+      .hero h1{font-size:clamp(45px,14vw,70px);letter-spacing:-3px}.hero-text{font-size:12px}.hero-buttons{flex-direction:column;align-items:flex-start}
+      .mission{padding:90px 7vw}.mission-content{margin-left:0}.mission h2,.section-title{font-size:clamp(43px,12vw,65px);letter-spacing:-3px}
+      .president-image{min-height:500px}.president-content{padding:75px 7vw}.president-content .eyebrow{margin-top:50px}
+      .president h2{font-size:clamp(43px,12vw,65px);letter-spacing:-3px}.quote{padding-left:30px}
+      .subsidiaries{padding:90px 6vw}.section-heading{grid-template-columns:1fr;gap:30px;margin-bottom:55px}.cards{grid-template-columns:1fr}
+      .card-image{height:280px}.card p{min-height:auto}.cta{min-height:500px;padding:80px 7vw}.cta h2{font-size:clamp(52px,14vw,75px);letter-spacing:-3px}
+      footer{padding:70px 7vw 25px}.footer-top{grid-template-columns:1fr;gap:50px;padding-bottom:60px}.footer-bottom{flex-direction:column;align-items:flex-start;gap:10px}
+    }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap nav">
-    <div class="logo">
-      <svg class="mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="4" y="14" width="4" height="14" fill="#C9A15C"/>
-        <rect x="10" y="9" width="4" height="19" fill="#C9A15C"/>
-        <rect x="16" y="4" width="4" height="24" fill="#E7C77E"/>
-        <path d="M23 28C27 28 30 24.5 30 20.5C30 17 27.5 14 24.5 13.5C25 12 24.5 10 23 9" stroke="#C9A15C" stroke-width="2" fill="none"/>
-      </svg>
-      EDE <span>İnşaat</span>
-    </div>
-    <nav class="navlinks">
-      <a href="#hizmetler">Hizmetler</a>
-      <a href="#surec">Kat Karşılığı Süreci</a>
-      <a href="#projeler">Projeler</a>
-      <a href="#ekip">Ekip</a>
-    </nav>
-    <a href="#iletisim" class="nav-cta">Teklif Al</a>
-  </div>
-</header>
-
-<section class="hero">
-  <div class="topo"></div>
-  <div class="wrap hero-grid">
-    <div data-reveal>
-      <div class="mono-label">İSTANBUL · İNŞAAT &amp; HARİTA MÜHENDİSLİĞİ</div>
-      <h1>Arsanız <em>değer</em> kazansın,<br>biz inşa edelim.</h1>
-      <p class="lead">Kat karşılığı inşaattan plankote ve harita mühendisliğine — arsa sahibinden ruhsata, ruhsattan teslime kadar sürecin her adımını şeffaf şekilde yönetiyoruz.</p>
-      <div class="btn-row">
-        <a href="#iletisim" class="btn btn-primary">Ücretsiz Keşif Talep Et</a>
-        <a href="#hizmetler" class="btn btn-ghost">Hizmetlerimiz</a>
-      </div>
-    </div>
-    <div class="hero-plate" data-reveal>
-      <div class="coord">41.0082° K, 28.9784° D <span>— YENİBOSNA / BAHÇELİEVLER</span></div>
-      <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
-        <g stroke="#C9A15C" stroke-width="1" fill="none" opacity="0.9">
-          <rect x="20" y="90" width="24" height="70"/>
-          <rect x="52" y="60" width="24" height="100"/>
-          <rect x="84" y="30" width="24" height="130"/>
-          <rect x="116" y="70" width="24" height="90"/>
-        </g>
-        <g stroke="#7C7666" stroke-width="1" opacity="0.6">
-          <line x1="10" y1="160" x2="290" y2="160"/>
-          <line x1="170" y1="20" x2="170" y2="160"/>
-          <line x1="165" y1="20" x2="175" y2="20"/>
-          <line x1="165" y1="160" x2="175" y2="160"/>
-        </g>
-        <circle cx="220" cy="90" r="34" stroke="#E7C77E" stroke-width="1" fill="none"/>
-        <line x1="220" y1="56" x2="220" y2="124" stroke="#E7C77E" stroke-width="0.6"/>
-        <line x1="186" y1="90" x2="254" y2="90" stroke="#E7C77E" stroke-width="0.6"/>
-      </svg>
-    </div>
-  </div>
-</section>
-
-<div class="strip">
-  <div class="wrap strip-inner">
-    <div class="strip-inner">
-      <span>01</span> KAT KARŞILIĞI İNŞAAT &nbsp;&nbsp;&nbsp; <span>02</span> HARİTA &amp; PLANKOTE &nbsp;&nbsp;&nbsp; <span>03</span> PROJE YÖNETİMİ &nbsp;&nbsp;&nbsp; <span>04</span> RUHSAT SÜRECİ &nbsp;&nbsp;&nbsp; <span>05</span> ANAHTAR TESLİM
-    </div>
+<div class="loader" id="loader">
+  <div class="loader-inner">
+    <div class="loader-logo">EDE</div>
+    <div class="loader-sub">İNŞAAT</div>
+    <div class="loader-line"></div>
   </div>
 </div>
 
-<section id="neden">
-  <div class="wrap">
-    <div class="section-head" data-reveal>
-      <div class="mono-label">NEDEN EDE</div>
-      <h2>Sahadan gelen mühendislik, masadan gelen şeffaflık.</h2>
-    </div>
-    <div class="why-grid" data-reveal>
-      <div class="why-card">
-        <div class="mono-label">/ 01</div>
-        <h3>Ölçüme Dayalı Fizibilite</h3>
-        <p>Her kat karşılığı teklifi önce sahada harita ekibimizin çıkardığı plankote ve imar analiziyle şekillenir; tahmine değil ölçüme dayanır.</p>
-      </div>
-      <div class="why-card">
-        <div class="mono-label">/ 02</div>
-        <h3>Tek Elden Süreç</h3>
-        <p>Ölçüm, mühendislik ve inşaat aynı çatı altında yürür. Arsa sahibi farklı taraflar arasında koşuşturmak zorunda kalmaz.</p>
-      </div>
-      <div class="why-card">
-        <div class="mono-label">/ 03</div>
-        <h3>Yerinde Takip</h3>
-        <p>Sözleşme aşamasından teslime kadar proje durumu düzenli olarak paylaşılır; süreç kapalı kapılar ardında ilerlemez.</p>
+<header class="navbar" id="navbar">
+  <a href="#anasayfa" class="logo">
+    <span class="logo-mark">E</span>
+    <span>EDE <small>İNŞAAT</small></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#anasayfa">Ana Sayfa</a>
+    <a href="#neden">Neden EDE</a>
+    <div class="dropdown">
+      <a href="#hizmetler">Hizmetlerimiz <span>⌄</span></a>
+      <div class="dropdown-menu">
+        <a href="#kat-karsiligi">Kat Karşılığı İnşaat</a>
+        <a href="#harita">Harita & Plankote</a>
+        <a href="#iscilik">İşçilik & Taahhüt</a>
       </div>
     </div>
+    <a href="#surec">Süreç</a>
+    <a href="#ekip">Ekip</a>
+    <a href="#iletisim">İletişim</a>
+  </nav>
+  <button class="mobile-button" id="mobileButton" aria-label="Menüyü aç"><span></span><span></span><span></span></button>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-inner">
+    <a href="#anasayfa">Ana Sayfa</a>
+    <a href="#neden">Neden EDE</a>
+    <a href="#hizmetler">Hizmetlerimiz</a>
+    <a href="#surec">Kat Karşılığı Süreci</a>
+    <a href="#ekip">Ekip</a>
+    <a href="#iletisim">İletişim</a>
   </div>
-</section>
+</div>
 
-<section id="hizmetler">
-  <div class="wrap">
-    <div class="section-head" data-reveal>
-      <div class="mono-label">HİZMETLER</div>
-      <h2>İnşaattan haritaya, tek çatı altında.</h2>
-      <p>Arsanızın değerlendirilmesinden ölçüme, kaba ve ince işçilikten taahhüde kadar yapım sürecinin her başlığında hizmet veriyoruz.</p>
-    </div>
-    <div class="services" data-reveal>
-      <div class="service-card">
-        <div class="num">/ HİZMET 01</div>
-        <h3>Kat Karşılığı İnşaat</h3>
-        <p>Arsanızı değerlendirip anahtar teslim projeye dönüştürüyoruz.</p>
-        <ul>
-          <li>Fizibilite ve kat karşılığı oranı belirleme</li>
-          <li>Mimari ve statik proje süreci</li>
-          <li>Ruhsat ve inşaat yönetimi</li>
-        </ul>
-      </div>
-      <div class="service-card">
-        <div class="num">/ HİZMET 02</div>
-        <h3>Harita &amp; Plankote</h3>
-        <p>Hassas saha ölçümü ve imar durumu analizleriyle sağlam bir temel kuruyoruz.</p>
-        <ul>
-          <li>Plankote ve aplikasyon</li>
-          <li>İmar durumu ve parselasyon incelemesi</li>
-          <li>Zemin etüdü koordinasyonu</li>
-          <li>Kübaj — hafriyat, kazı ve dolgu hesapları</li>
-        </ul>
-      </div>
-      <div class="service-card">
-        <div class="num">/ HİZMET 03</div>
-        <h3>Proje &amp; Mühendislik Yönetimi</h3>
-        <p>Ruhsattan teslime kadar tüm süreci uçtan uca yönetiyoruz.</p>
-        <ul>
-          <li>Şantiye ve saha denetimi</li>
-          <li>Taşeron ve tedarik koordinasyonu</li>
-          <li>Teslim ve iskân süreci takibi</li>
-        </ul>
+<main>
+  <section class="hero" id="anasayfa">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="eyebrow">İSTANBUL · İNŞAAT & HARİTA MÜHENDİSLİĞİ</div>
+      <h1>Arsanız <span>değer</span> kazansın,<br>biz inşa edelim.</h1>
+      <p class="hero-text">Kat karşılığı inşaattan plankote ve harita mühendisliğine; arsa sahibinden ruhsata, ruhsattan teslime kadar sürecin her adımını şeffaf şekilde yönetiyoruz.</p>
+      <div class="hero-buttons">
+        <a href="#iletisim" class="button button-gold">Ücretsiz Keşif Talep Et <span class="arrow">↗</span></a>
+        <a href="#hizmetler" class="button button-outline">Hizmetlerimiz</a>
       </div>
     </div>
+    <div class="scroll">SCROLL TO EXPLORE <span class="scroll-line"></span></div>
+  </section>
 
-    <div class="services-sub">
-      <div class="sub-head" data-reveal>
-        <div class="mono-label">İŞÇİLİK &amp; TAAHHÜT</div>
-        <h3>Yapım aşamasında saha hizmetleri</h3>
-        <p>Kaba inşaattan son dokunuşa kadar işçilik ve taahhüt kalemlerini kendi ekibimizle yürütüyoruz.</p>
-      </div>
-      <div class="services-prose" data-reveal>
-        <div class="service-card">
-          <div class="num">/ HİZMET 04</div>
-          <h3>Kaba İşçilik Hizmeti</h3>
-          <p>Projelerinizin yapım süreçlerinin tamamına destek vermekten gurur duyuyoruz. Bünyemizdeki uzman kadromuz ile kaba inşaat işçilik hizmetlerinizi güvenle sunuyoruz. EDE İnşaat; İstanbul başta olmak üzere birçok projenin kaba işçilik hizmetini başarıyla tamamlamış, birçok yaşam alanı için güvenli yapılar inşa etmiş ve yaşam alanlarınıza katma değer katmıştır.</p>
-        </div>
-        <div class="service-card">
-          <div class="num">/ HİZMET 05</div>
-          <h3>İnce İşçilik Hizmetleri</h3>
-          <p>Projelerinizin son dokunuşunu yapmak bizim için mutluluktur. Kaba işçiliği bitmiş birçok binanın ince işçilik hizmetini alanında uzman ekibimiz ile tamamlıyoruz. Projelerinizin en ince ayrıntısına kadar mimari özelliklerini yansıtması için çalışıyoruz. Yaşam kalitenizi artıracak yapıları kendi dokunuşlarımızla mimari ve mühendislik anlamında kusursuz hale getiriyor, binanın görsel bütünlüğünü ortaya çıkaran ince işçiliği bu doğrultuda sağlıyoruz.</p>
-        </div>
-        <div class="service-card">
-          <div class="num">/ HİZMET 06</div>
-          <h3>Taahhüt Hizmetleri</h3>
-          <p>Yaptığımız projelerde kalite güvencesi en önemli unsurlardan biridir. Geçerli standartlara uygun bir proje yapıldığından bu şekilde emin olabiliriz. Maliyetleri düşürmek adına yanlış işlemler yapmak, imalatın projeye uygunluğu konusunda sakıncalar doğurmaktadır. EDE İnşaat bu hususa önem göstermekte; projelerin ilk adımından son adımına kadar işlemlerin en doğru yöntemlerle yapılması konusunda müşterilerine güvence vermektedir.</p>
-        </div>
-        <div class="service-card">
-          <div class="num">/ HİZMET 07</div>
-          <h3>Cephe Yalıtım Hizmetleri</h3>
-          <p>EDE İnşaat olarak, işçilik hizmeti sunduğumuz birçok projede dış cephe yalıtımı alanında da hizmet sağladık. Ana hizmet kollarımızdan birini oluşturan yalıtım ve dış cephe işçiliğini Ytong gibi kaliteli ve 1. sınıf malzemeler ile tamamlıyoruz. Binalarınızın soğuğa ve sıcağa karşı dayanıklılığını artırıyor, afetlerde yanma riskine karşı korunmasını sağlıyoruz.</p>
+  <section class="mission">
+    <div class="section-number">01</div>
+    <div class="mission-content reveal">
+      <div class="eyebrow dark">YAKLAŞIMIMIZ</div>
+      <h2>Ölçüme dayalı,<br><em>şeffaf</em> mühendislik.</h2>
+      <p class="mission-description">EDE İnşaat; kat karşılığı inşaat, harita mühendisliği, plankote, işçilik ve taahhüt hizmetlerini aynı profesyonel anlayış altında bir araya getiriyor. Her projeyi sahadan başlayan doğru ölçüm, açık iletişim ve kontrollü uygulama yaklaşımıyla ele alıyoruz.</p>
+    </div>
+  </section>
+
+  <section class="president" id="neden">
+    <div class="president-image">
+      <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1200&q=85" alt="EDE İnşaat">
+      <div class="image-label">EDE İNŞAAT</div>
+    </div>
+    <div class="president-content reveal">
+      <div class="section-number">02</div>
+      <div class="eyebrow">NEDEN EDE</div>
+      <h2>Sahadan gelen,<br>ölçüme dayanan,<br><em>şeffaf ilerleyen.</em></h2>
+      <div class="quote">
+        <span class="quote-mark">“</span>
+        <p>Kat karşılığı projelerde doğru kararın temelinde doğru fizibilite olduğuna inanıyoruz. Bu nedenle sürece yalnızca inşaat tarafından değil, harita ve saha ölçümleri tarafından da bakıyoruz.</p>
+        <p>Ölçüm, mühendislik ve yapım süreçlerini koordineli yürütmek; arsa sahibinin farklı taraflarla ayrı ayrı uğraşmak zorunda kalmadan projesini takip edebilmesini sağlıyor.</p>
+        <p>Sözleşmeden teslime kadar her aşamada açık iletişim, doğru uygulama ve sahada düzenli takip anlayışını esas alıyoruz.</p>
+        <div class="signature">
+          <strong>EDE İnşaat</strong>
+          <span>İNŞAAT · HARİTA · PROJE YÖNETİMİ</span>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="process" id="surec">
-  <div class="wrap">
-    <div class="section-head" data-reveal>
-      <div class="mono-label">KAT KARŞILIĞI SÜRECİ</div>
-      <h2>Arsa sahibinden anahtar tesliме, beş adım.</h2>
-      <p>Kat karşılığı süreci arsa sahibi için genelde belirsiz görünür. Biz her adımı önceden tarif ediyoruz.</p>
+  <section class="subsidiaries" id="hizmetler">
+    <div class="section-heading reveal">
+      <div>
+        <div class="eyebrow dark">03 / HİZMETLERİMİZ</div>
+        <h2 class="section-title">İnşaattan<br><em>haritaya</em>, tek çatı altında.</h2>
+      </div>
+      <p>Arsanın değerlendirilmesinden ölçüme, ruhsat sürecinden yapım ve teslime kadar ihtiyaç duyulan mühendislik ve uygulama hizmetlerini bir bütün olarak sunuyoruz.</p>
     </div>
-    <div class="process-list" data-reveal>
-      <div class="process-item">
-        <div class="num">01</div>
-        <div><h4>Görüşme &amp; Keşif</h4><p>Arsanızı yerinde inceliyor, beklentilerinizi ve bölgenin imar durumunu birlikte değerlendiriyoruz.</p></div>
+
+    <div class="cards">
+      <article class="card reveal" id="kat-karsiligi">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1200&q=85" alt="Kat Karşılığı İnşaat">
+          <div class="card-number">01</div>
+        </div>
+        <div class="card-content">
+          <div class="card-tag">KAT KARŞILIĞI İNŞAAT</div>
+          <h3>Kat Karşılığı İnşaat</h3>
+          <p>Arsanızı değerlendirip fizibiliteden ruhsata, inşaattan anahtar teslimine kadar süreci yönetiyoruz.</p>
+          <a href="#surec" class="card-link">Süreci İncele <span class="arrow">↗</span></a>
+        </div>
+      </article>
+
+      <article class="card reveal" id="harita">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=85" alt="Harita ve Plankote">
+          <div class="card-number">02</div>
+        </div>
+        <div class="card-content">
+          <div class="card-tag">HARİTA & PLANKOTE</div>
+          <h3>Harita & Plankote</h3>
+          <p>Hassas saha ölçümleri ve imar analizleriyle projenin teknik temelini oluşturuyoruz.</p>
+          <a href="#iletisim" class="card-link">Bilgi Al <span class="arrow">↗</span></a>
+        </div>
+      </article>
+
+      <article class="card reveal" id="iscilik">
+        <div class="card-image">
+          <img src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=85" alt="İşçilik ve Taahhüt">
+          <div class="card-number">03</div>
+        </div>
+        <div class="card-content">
+          <div class="card-tag">İŞÇİLİK & TAAHHÜT</div>
+          <h3>Yapım Hizmetleri</h3>
+          <p>Kaba ve ince işçilikten taahhüt ve dış cephe yalıtımına kadar uygulama süreçlerinde uzman ekiplerle çalışıyoruz.</p>
+          <a href="#iletisim" class="card-link">Bilgi Al <span class="arrow">↗</span></a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="mission" style="background:#111;color:#fff" id="hizmet-detay">
+    <div class="section-number" style="color:#777">04</div>
+    <div class="mission-content reveal">
+      <div class="eyebrow">UYGULAMA GÜCÜMÜZ</div>
+      <h2>Kaba işçilikten<br><em>son dokunuşa.</em></h2>
+      <p class="mission-description" style="color:#aaa">EDE İnşaat, yapım süreçlerinde kaba inşaat işçiliği, ince işçilik, taahhüt ve dış cephe yalıtımı hizmetleri sunuyor. Alanında uzman ekiplerle projelerin teknik ve görsel bütünlüğünü korumayı hedefliyoruz.</p>
+    </div>
+  </section>
+
+  <section class="subsidiaries" style="background:#f5f3ef" id="detaylar">
+    <div class="section-heading reveal">
+      <div>
+        <div class="eyebrow dark">05 / UZMANLIK ALANLARI</div>
+        <h2 class="section-title">Yapının her<br><em>aşamasında.</em></h2>
       </div>
-      <div class="process-item">
-        <div class="num">02</div>
-        <div><h4>Ölçüm &amp; Fizibilite</h4><p>Harita ekibimiz plankote çıkarır; imar durumuna göre inşa edilebilir m² ve kat karşılığı oranı hesaplanır.</p></div>
+      <p>İşçilik ve taahhüt hizmetlerini projenin ihtiyaçlarına göre planlıyor, uygulamanın standartlara uygun ve kontrollü şekilde ilerlemesine önem veriyoruz.</p>
+    </div>
+    <div class="cards">
+      <article class="card reveal">
+        <div class="card-content">
+          <div class="card-tag">HİZMET 04</div>
+          <h3>Kaba İşçilik</h3>
+          <p>Uzman kadromuzla kaba inşaat süreçlerinde güvenilir işçilik hizmeti sunuyor, projelerin sağlam bir yapım temeli üzerinde ilerlemesine katkı sağlıyoruz.</p>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card-content">
+          <div class="card-tag">HİZMET 05</div>
+          <h3>İnce İşçilik</h3>
+          <p>Kaba işçiliği tamamlanan yapıların mimari özelliklerini yansıtan ince işçilik uygulamalarını titizlikle tamamlıyor, görsel bütünlüğe odaklanıyoruz.</p>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card-content">
+          <div class="card-tag">HİZMET 06</div>
+          <h3>Taahhüt</h3>
+          <p>Projelerin ilk adımından son adımına kadar uygulamaların doğru yöntemlerle ve geçerli standartlara uygun şekilde yürütülmesine önem veriyoruz.</p>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card-content">
+          <div class="card-tag">HİZMET 07</div>
+          <h3>Cephe Yalıtımı</h3>
+          <p>Dış cephe yalıtımı ve uygulamalarında kaliteli malzemelerle yapıların ısı dayanımına ve dış etkilere karşı korunmasına katkı sağlıyoruz.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="process" id="surec" style="padding:135px 7vw;background:#111;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+    <div class="wrap" style="max-width:1200px;margin:auto">
+      <div class="section-head reveal" style="max-width:700px;margin-bottom:65px">
+        <div class="eyebrow">KAT KARŞILIĞI SÜRECİ</div>
+        <h2 style="font-family:Manrope;font-size:clamp(45px,6vw,82px);line-height:1;letter-spacing:-4px;font-weight:500">Arsa sahibinden<br><em style="color:var(--gold-light);font-style:normal">anahtar teslime.</em></h2>
+        <p style="color:#999;margin-top:25px;font-size:14px;line-height:1.9">Kat karşılığı sürecinin her adımını önceden tarif ediyor, fizibiliteden teslim aşamasına kadar kontrollü ilerliyoruz.</p>
       </div>
-      <div class="process-item">
-        <div class="num">03</div>
-        <div><h4>Teklif &amp; Sözleşme</h4><p>Kat karşılığı oranı ve teslim koşulları netleşir; şartlar açıkça yazılı sözleşmeye dökülür.</p></div>
+      <div style="display:flex;flex-direction:column" class="reveal">
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:28px;padding:32px 0;border-top:1px solid var(--line)">
+          <div style="font-family:monospace;font-size:26px;color:var(--gold-dim)">01</div><div><h4 style="font-family:Manrope;font-size:19px;margin-bottom:8px">Görüşme & Keşif</h4><p style="color:#999;font-size:14.5px;max-width:600px">Arsanızı yerinde inceliyor, beklentilerinizi ve bölgenin imar durumunu birlikte değerlendiriyoruz.</p></div>
+        </div>
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:28px;padding:32px 0;border-top:1px solid var(--line)">
+          <div style="font-family:monospace;font-size:26px;color:var(--gold-dim)">02</div><div><h4 style="font-family:Manrope;font-size:19px;margin-bottom:8px">Ölçüm & Fizibilite</h4><p style="color:#999;font-size:14.5px;max-width:600px">Harita ekibimiz plankote çıkarır; imar durumuna göre inşa edilebilir alan ve kat karşılığı oranı değerlendirilir.</p></div>
+        </div>
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:28px;padding:32px 0;border-top:1px solid var(--line)">
+          <div style="font-family:monospace;font-size:26px;color:var(--gold-dim)">03</div><div><h4 style="font-family:Manrope;font-size:19px;margin-bottom:8px">Teklif & Sözleşme</h4><p style="color:#999;font-size:14.5px;max-width:600px">Kat karşılığı oranı ve teslim koşulları netleşir; şartlar açıkça yazılı sözleşmeye dönüştürülür.</p></div>
+        </div>
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:28px;padding:32px 0;border-top:1px solid var(--line)">
+          <div style="font-family:monospace;font-size:26px;color:var(--gold-dim)">04</div><div><h4 style="font-family:Manrope;font-size:19px;margin-bottom:8px">Ruhsat & İnşaat</h4><p style="color:#999;font-size:14.5px;max-width:600px">Mimari ve statik proje süreçleri, ruhsat işlemleri ve inşaat uygulamaları koordineli şekilde yürütülür.</p></div>
+        </div>
+        <div style="display:grid;grid-template-columns:90px 1fr;gap:28px;padding:32px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+          <div style="font-family:monospace;font-size:26px;color:var(--gold-dim)">05</div><div><h4 style="font-family:Manrope;font-size:19px;margin-bottom:8px">Teslim</h4><p style="color:#999;font-size:14.5px;max-width:600px">Daireler ve yaşam alanları, sözleşmede belirlenen koşullar doğrultusunda anahtar teslim olarak sunulur.</p></div>
+        </div>
       </div>
-      <div class="process-item">
-        <div class="num">04</div>
-        <div><h4>Ruhsat &amp; İnşaat</h4><p>Mimari ve statik projeler onaylanır, ruhsat alınır, inşaat düzenli saha denetimiyle ilerler.</p></div>
+    </div>
+  </section>
+
+  <section id="projeler" style="padding:135px 7vw;background:#090909">
+    <div style="max-width:1200px;margin:auto">
+      <div class="section-heading reveal" style="display:grid;grid-template-columns:1fr .65fr;gap:80px;align-items:end;margin-bottom:75px">
+        <div><div class="eyebrow">06 / PROJELER</div><h2 class="section-title" style="color:#fff">Projelerimiz<br><em>yakında.</em></h2></div>
+        <p style="color:#777;font-size:13px;line-height:1.9">Devam eden ve tamamlanan projelerimize ait görseller bu alanda yayınlanacaktır.</p>
       </div>
-      <div class="process-item">
-        <div class="num">05</div>
-        <div><h4>Teslim</h4><p>Daireleriniz sözleşmede belirlenen koşullarla, anahtar teslim size teslim edilir.</p></div>
+      <div class="cards">
+        <article class="card reveal"><div class="card-image"><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=85" alt="EDE İnşaat Projesi"></div><div class="card-content"><div class="card-tag">PROJE</div><h3>Yakında</h3><p>Proje detayları ve görselleri bu alanda paylaşılacaktır.</p></div></article>
+        <article class="card reveal"><div class="card-image"><img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1200&q=85" alt="EDE İnşaat Projesi"></div><div class="card-content"><div class="card-tag">PROJE</div><h3>Yakında</h3><p>Proje detayları ve görselleri bu alanda paylaşılacaktır.</p></div></article>
+        <article class="card reveal"><div class="card-image"><img src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1200&q=85" alt="EDE İnşaat Projesi"></div><div class="card-content"><div class="card-tag">PROJE</div><h3>Yakında</h3><p>Proje detayları ve görselleri bu alanda paylaşılacaktır.</p></div></article>
       </div>
+    </div>
+  </section>
+
+  <section id="ekip" style="padding:135px 7vw;background:#f5f3ef;color:#0b0b0b">
+    <div style="max-width:1200px;margin:auto">
+      <div class="section-heading reveal" style="display:grid;grid-template-columns:1fr .65fr;gap:80px;align-items:end;margin-bottom:75px">
+        <div><div class="eyebrow dark">07 / EKİP</div><h2 class="section-title">Sahada ve masada<br><em>aynı ekip.</em></h2></div>
+        <p style="color:#666;font-size:13px;line-height:1.9">Mühendislik ve saha tecrübesini bir araya getiren ekibimizle projelerinizi planlıyor ve uyguluyoruz.</p>
+      </div>
+      <div class="cards">
+        <article class="card reveal"><div class="card-content"><div class="card-tag">İNŞAAT MÜHENDİSİ</div><h3>Deniz Tolu</h3><p style="min-height:auto">İnşaat Mühendisi<br><br>+90 (552) 754 68 61<br>info@edeinsaat.com</p></div></article>
+        <article class="card reveal"><div class="card-content"><div class="card-tag">HARİTA TEKNİKERİ</div><h3>Emirhan Koçak</h3><p style="min-height:auto">Harita Teknikeri<br><br>0541 224 04 25<br>info@edeinsaat.com</p></div></article>
+        <article class="card reveal"><div class="card-content"><div class="card-tag">HARİTA TEKNİKERİ</div><h3>Ertugrul Duman</h3><p style="min-height:auto">Harita Teknikeri<br><br>0 (534) 966 56 40<br>info@edeinsaat.com</p></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="cta-bg"></div>
+    <div class="cta-content reveal">
+      <div class="eyebrow">BİRLİKTE DEĞERLENDİRELİM</div>
+      <h2>Arsanızı<br><em>konuşalım.</em></h2>
+      <p class="cta-description">Arsanızın potansiyelini birlikte değerlendirelim. Ücretsiz keşif için bize ulaşın, ekibimiz en kısa sürede sizinle iletişime geçsin.</p>
+      <a href="#iletisim" class="button button-white">Ücretsiz Keşif Talep Et <span class="arrow">↗</span></a>
+    </div>
+  </section>
+</main>
+
+<footer id="iletisim">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#anasayfa" class="logo"><span class="logo-mark">E</span><span>EDE <small>İNŞAAT</small></span></a>
+      <p>Kat karşılığı inşaat, harita mühendisliği, işçilik ve taahhüt hizmetlerinde güvenilir ve şeffaf çözümler.</p>
+    </div>
+    <div class="footer-column">
+      <h4>MENÜ</h4>
+      <a href="#anasayfa">Ana Sayfa</a>
+      <a href="#neden">Neden EDE</a>
+      <a href="#hizmetler">Hizmetlerimiz</a>
+      <a href="#surec">Kat Karşılığı Süreci</a>
+      <a href="#ekip">Ekip</a>
+      <a href="#iletisim">İletişim</a>
+    </div>
+    <div class="footer-column">
+      <h4>İLETİŞİM</h4>
+      <p>Merkez Mah. Adem Sok. No:12<br>Yenibosna / Bahçelievler / İstanbul</p>
+      <a href="tel:+905527546861">+90 (552) 754 68 61</a>
+      <a href="mailto:info@edeinsaat.com">info@edeinsaat.com</a>
+      <a href="https://www.edeinsaat.com" target="_blank" rel="noopener">www.edeinsaat.com</a>
     </div>
   </div>
-</section>
-
-<section id="projeler">
-  <div class="wrap">
-    <div class="section-head" data-reveal>
-      <div class="mono-label">PROJELER</div>
-      <h2>Devam eden ve tamamlanan işlerimiz.</h2>
-      <p>Proje görselleri yakında eklenecek — şu an yer tutucu olarak gösteriliyor.</p>
-    </div>
-    <div class="projects-grid" data-reveal>
-      <div class="project-card">
-        <svg viewBox="0 0 48 48" fill="none" stroke="#C9A15C" stroke-width="1.4"><rect x="10" y="18" width="10" height="24"/><rect x="22" y="10" width="10" height="32"/><rect x="34" y="24" width="6" height="18"/></svg>
-        <span>Proje Görseli Eklenecek</span>
-      </div>
-      <div class="project-card">
-        <svg viewBox="0 0 48 48" fill="none" stroke="#C9A15C" stroke-width="1.4"><rect x="10" y="18" width="10" height="24"/><rect x="22" y="10" width="10" height="32"/><rect x="34" y="24" width="6" height="18"/></svg>
-        <span>Proje Görseli Eklenecek</span>
-      </div>
-      <div class="project-card">
-        <svg viewBox="0 0 48 48" fill="none" stroke="#C9A15C" stroke-width="1.4"><rect x="10" y="18" width="10" height="24"/><rect x="22" y="10" width="10" height="32"/><rect x="34" y="24" width="6" height="18"/></svg>
-        <span>Proje Görseli Eklenecek</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="ekip">
-  <div class="wrap">
-    <div class="section-head" data-reveal>
-      <div class="mono-label">EKİP</div>
-      <h2>Sahada ve masada aynı ekip.</h2>
-    </div>
-    <div class="team-grid" data-reveal>
-      <div class="team-card">
-        <div class="avatar">DT</div>
-        <h4>Deniz Tolu</h4>
-        <div class="role">İnşaat Mühendisi</div>
-        <div class="contact-line">+90 (552) 754 68 61</div>
-        <div class="contact-line">info@edeinsaat.com</div>
-      </div>
-      <div class="team-card">
-        <div class="avatar">EK</div>
-        <h4>Emirhan Koçak</h4>
-        <div class="role">Harita Teknikeri</div>
-        <div class="contact-line">0541 224 04 25</div>
-        <div class="contact-line">info@edeinsaat.com</div>
-      </div>
-      <div class="team-card">
-        <div class="avatar">ED</div>
-        <h4>Ertugrul Duman</h4>
-        <div class="role">Harita Teknikeri</div>
-        <div class="contact-line">0 (534) 966 56 40</div>
-        <div class="contact-line">info@edeinsaat.com</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="contact" id="iletisim">
-  <div class="wrap contact-grid">
-    <div data-reveal>
-      <div class="mono-label">İLETİŞİM</div>
-      <h2>Arsanızı birlikte değerlendirelim.</h2>
-      <p class="lead">Ücretsiz keşif için bize ulaşın; ekibimiz en kısa sürede sizinle iletişime geçsin.</p>
-      <div class="info-row"><div class="k">Adres</div><div class="v">Merkez Mah. Adem Sok. No:12<br>Yenibosna / Bahçelievler / İstanbul</div></div>
-      <div class="info-row"><div class="k">E-posta</div><div class="v">info@edeinsaat.com</div></div>
-      <div class="info-row"><div class="k">Web</div><div class="v">www.edeinsaat.com</div></div>
-    </div>
-    <form data-reveal onsubmit="event.preventDefault(); this.reset(); alert('Talebiniz alındı, en kısa sürede dönüş yapacağız.');">
-      <div class="field"><label for="ad">Ad Soyad</label><input id="ad" type="text" required></div>
-      <div class="field"><label for="tel">Telefon</label><input id="tel" type="tel" required></div>
-      <div class="field"><label for="konum">Arsa Konumu</label><input id="konum" type="text" placeholder="İlçe / Mahalle"></div>
-      <div class="field"><label for="mesaj">Mesajınız</label><textarea id="mesaj" placeholder="Arsanız ve beklentileriniz hakkında kısaca bilgi verin"></textarea></div>
-      <button class="submit-btn" type="submit">Talebi Gönder</button>
-    </form>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap foot-row">
-    <div class="logo">EDE <span style="color:var(--gold);">İnşaat</span></div>
-    <div class="copy">© 2026 EDE İNŞAAT | HARİTA — YENİBOSNA / İSTANBUL</div>
+  <div class="footer-bottom">
+    <span>© 2026 EDE İnşaat. Tüm hakları saklıdır.</span>
+    <span>EDE İNŞAAT · YENİBOSNA / İSTANBUL</span>
   </div>
 </footer>
 
 <script>
-  const items = document.querySelectorAll('[data-reveal]');
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-  }, {threshold:0.15});
-  items.forEach(el=>io.observe(el));
-</script>
+  window.addEventListener("load",function(){
+    setTimeout(function(){document.getElementById("loader").classList.add("hide")},800);
+  });
 
+  const navbar=document.getElementById("navbar");
+  window.addEventListener("scroll",function(){
+    if(window.scrollY>80) navbar.classList.add("scrolled");
+    else navbar.classList.remove("scrolled");
+  });
+
+  const mobileButton=document.getElementById("mobileButton");
+  const mobileMenu=document.getElementById("mobileMenu");
+  mobileButton.addEventListener("click",function(){mobileMenu.classList.toggle("active")});
+  document.querySelectorAll(".mobile-menu a").forEach(function(link){
+    link.addEventListener("click",function(){mobileMenu.classList.remove("active")});
+  });
+  document.addEventListener("keydown",function(event){
+    if(event.key==="Escape") mobileMenu.classList.remove("active");
+  });
+
+  const reveals=document.querySelectorAll(".reveal");
+  const revealObserver=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add("show");
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  },{threshold:.12});
+  reveals.forEach(function(element){revealObserver.observe(element)});
+</script>
 </body>
 </html>
